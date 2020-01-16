@@ -268,8 +268,8 @@ io.on('connection', function (socket) {
 		
 console.log(fields);
 
-		var createfields = fields.join(' TEXT, ');
-		var sql = "CREATE TABLE IF NOT EXISTS databuilder (" + createfields + " TEXT)";
+		var createfields = fields.join('" TEXT, "');
+		var sql = "CREATE TABLE IF NOT EXISTS databuilder (\"" + createfields + "\" TEXT)";
 		
 console.log(sql);
     
@@ -320,7 +320,15 @@ console.log(sql);
 				sql = "SELECT count(*) AS totcount FROM databuilder";
 				db.get(sql, [], (lerr, lrow) => {
 
-					var insertcount = lrow.totcount;
+
+					if (lrow)
+					{
+						var insertcount = lrow.totcount;
+					}
+					else
+					{
+						var insertcount = 0;
+					}
 			
 					socket.emit('buildingDatabaseMessage', 'Inserted ' + insertcount + ' records');
 					socket.emit('buildingDatabaseReset', true);
@@ -386,7 +394,7 @@ console.log(vendorjsonkeys);
 
 console.log('OK - CONTINUE');
 
-							let insertfields = fields.join(', ');
+							let insertfields = fields.join('", "');
 							
 							let qmarks = [];
 							let ldata = [];
@@ -400,7 +408,7 @@ console.log('OK - CONTINUE');
 							}
 							let insertqmarks = qmarks.join(',');
 							
-							sql = "INSERT INTO databuilder (" + insertfields + ") VALUES (" + insertqmarks + ")";
+							sql = "INSERT INTO databuilder (\"" + insertfields + "\") VALUES (" + insertqmarks + ")";
 							
 console.log(sql);
 console.log(ldata);
