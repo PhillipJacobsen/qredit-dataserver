@@ -20,6 +20,11 @@ Install packages
 npm install
 ```
 
+Make DB folder
+```
+mkdir db
+```
+
 Start the program:
 ```
 pm2 start app

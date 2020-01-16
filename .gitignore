@@ -2,7 +2,7 @@
 node_modules
 
 # database dir
-db/*.db
+db/
 
 # Optional npm cache directory
 .npm
