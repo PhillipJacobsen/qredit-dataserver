@@ -15,6 +15,11 @@ Install PM2
 npm install -g pm2
 ```
 
+Install packages
+```
+npm install
+```
+
 Start the program:
 ```
 pm2 start app
