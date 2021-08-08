@@ -205,6 +205,7 @@ io.on('connection', function (socket) {
 		//var toAddress = qreditjs.crypto.getAddress(publickey);
 		
 		var toAddress = 'QgskPMXNNPz5KjebYcaAdgzcxFPKJu9z5K'; // Mike Testing Wallet
+		// XQRJgWWdxrUqn7hnrtMWbVh7wgz2tP6hnh <-- use this address on the new qredit blockchain
         
         var transaction = qreditjs.transaction.createTransaction(toAddress, 1, vendorField, pKey);
 
