@@ -6,6 +6,7 @@
     "start": "node qds.js"
   },
   "dependencies": {
+    "@qredit/crypto": "git+https://github.com/Qredit/crypto.git",
     "async": "^3.1.0",
     "big.js": "^5.2.2",
     "body-parser": "^1.19.0",

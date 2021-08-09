@@ -18,10 +18,14 @@ const asyncv3	  = require('async');
 
 
 // Qredit Libs
-const qreditjs 	= require("qreditjs"); 
-const qreditApi = require("nodeQreditApi");
+//const qreditjs 	= require("qreditjs"); 
+const { Transactions: QreditTransactions, Managers: QreditManagers, Utils: QreditUtils, Identities: QreditIdentities } = require("@qredit/crypto"); //https://github.com/Qredit/crypto
 
-const qapi = new qreditApi.default();
+QreditManagers.configManager.setFromPreset("mainnet");
+QreditManagers.configManager.setHeight(2);
+					
+const qreditApi = require("nodeQreditApi");
+const qapi = new qreditApi.default("http://95.217.235.75/api");
 
 var indexRouter = require('./routes/index');
 
@@ -144,15 +148,12 @@ io.on('connection', function (socket) {
     	
     	(async () => {
     	
-			var keys = qreditjs.crypto.getKeys(pKey);
-			var publickey = keys.publicKey;
-			var privatekey = keys.d.toBuffer().toString("hex");
-			var newaddress = qreditjs.crypto.getAddress(publickey);
-    	
-    		var balance = await qapi.getWalletBalance(newaddress);
+			var recipientId = QreditIdentities.Address.fromPassphrase(pKey);
+
+    		var balance = await qapi.getWalletBalance(recipientId);
     		
     		var newjson = {};
-    		newjson.address = newaddress;
+    		newjson.address = recipientId;
     		newjson.balance = balance;
     		    		
         	socket.emit('getKeyDetails', newjson);
@@ -196,20 +197,39 @@ io.on('connection', function (socket) {
     
     socket.on('createtransaction', function (input) {
     
-    	var pKey = input.privKey;
-    	var vendorField = input.vendorField;
-    	
-		//var keys = qreditjs.crypto.getKeys(pKey);
-		//var publickey = keys.publicKey;
-		//var privatekey = keys.d.toBuffer().toString("hex");
-		//var toAddress = qreditjs.crypto.getAddress(publickey);
-		
-		var toAddress = 'QgskPMXNNPz5KjebYcaAdgzcxFPKJu9z5K'; // Mike Testing Wallet
-		// XQRJgWWdxrUqn7hnrtMWbVh7wgz2tP6hnh <-- use this address on the new qredit blockchain
-        
-        var transaction = qreditjs.transaction.createTransaction(toAddress, 1, vendorField, pKey);
+    	(async () => {
+    
+    		var pKey = input.privKey;
+    		var vendorField = input.vendorField;
 
-        (async () => {
+			var sender = QreditIdentities.Address.fromPassphrase(pKey);
+		
+			var walletInfo = await qapi.getWalletByID(sender);
+
+			var toAddress = 'QgskPMXNNPz5KjebYcaAdgzcxFPKJu9z5K'; // Mike Testing Wallet, update to something else
+			// XQRJgWWdxrUqn7hnrtMWbVh7wgz2tP6hnh <-- use this address on the new qredit blockchain
+
+			var currentnonce = walletInfo.data.nonce;
+
+			if (currentnonce != null)
+			{
+				var newnonce = Big(currentnonce).plus(1).toFixed(0);
+			}
+			else
+			{
+				var newnonce = '1';
+			}
+						
+			//  Create the transaction
+			var itransaction = QreditTransactions.BuilderFactory.transfer()
+				.version(2)
+				.nonce(newnonce)
+				.recipientId(toAddress)
+				.amount(1)
+				.vendorField(vendorField)
+				.sign(pKey); //  mnemonic
+
+			var transaction = itransaction.build().toJson();
         
         	var result = await qapi.createTransaction([transaction]);
         	
@@ -241,12 +261,8 @@ io.on('connection', function (socket) {
     	var privkey = input.privkey;
     	var sql = '';
     	
-		var keys = qreditjs.crypto.getKeys(privkey);
-		var publickey = keys.publicKey;
-		var privatekey = keys.d.toBuffer().toString("hex");
-		var fromAddress = qreditjs.crypto.getAddress(publickey);
-    	
-    
+		var fromAddress = QreditIdentities.Address.fromPassphrase(privkey);
+
 		let db = new sqlite3.Database('./db/' + sessionid + '.db', (err) => {
 		  if (err) {
 			console.error(err.message);
