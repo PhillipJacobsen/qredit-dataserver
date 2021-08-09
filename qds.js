@@ -206,7 +206,7 @@ io.on('connection', function (socket) {
 		
 			var walletInfo = await qapi.getWalletByID(sender);
 
-			var toAddress = 'QgskPMXNNPz5KjebYcaAdgzcxFPKJu9z5K'; // Mike Testing Wallet, update to something else
+			var toAddress = 'XQRJgWWdxrUqn7hnrtMWbVh7wgz2tP6hnh'; // Mike Testing Wallet, update to something else
 			// XQRJgWWdxrUqn7hnrtMWbVh7wgz2tP6hnh <-- use this address on the new qredit blockchain
 
 			var currentnonce = walletInfo.data.nonce;
